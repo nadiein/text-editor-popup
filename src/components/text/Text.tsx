@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { ApiService, RequestParams } from '../../api/service';
 import { EventDispatcher, EventType } from '../../utils/utils';
+import { Select } from './../select/Select';
 
 type MyProps = {};
 type MyState = {
@@ -13,6 +14,8 @@ type MyState = {
 export default class Text extends Component<MyProps, MyState> {
     public service:ApiService;
     public stateConfig:MyState;
+
+    get selectedText():any { return window.getSelection ? window.getSelection().getRangeAt(0) : '' }
 
     constructor(service:ApiService) {
         super(null);
@@ -45,7 +48,7 @@ export default class Text extends Component<MyProps, MyState> {
             }
             case EventType.MouseUp: {
                 let params:RequestParams = new RequestParams();
-                params.word = this.getSelection();
+                params.word = this.selectedText;
                 if (params.word !== '') {
                     this.getSynonimsForWord(params);
                 }
@@ -54,13 +57,24 @@ export default class Text extends Component<MyProps, MyState> {
         }
     }
 
-    getSelection = () => {
-        let selection:string = '';
 
-        if (window.getSelection) selection = window.getSelection().toString();
+    onSelectChange = (option:string) => {
+        if (this.selectedText != '') {
+            this.selectedText.deleteContents();
 
-        return selection;
+            let newElement = document.createElement('span');
+            newElement.textContent = option + ' ';
+            let fragment = document.createDocumentFragment()
+            let node = null;
+            let lastNode = null;
+            while ( (node = newElement.firstChild) ) {
+                lastNode = fragment.appendChild(node);
+            }
+            this.selectedText.insertNode(fragment);
+        }
     }
+
+    // handle case with select component still exist when selection is empty
 
     render() {
         const {model, synonims, isLoading, errorMessage} = this.state;
@@ -80,11 +94,7 @@ export default class Text extends Component<MyProps, MyState> {
                     </li>
                 )) : errorMessage}
                 <ul>
-                    {synonims && synonims.words ? synonims.words.map((item:any, id:any) => (
-                        <li key={id}>
-                            {item}
-                        </li>
-                    )) : errorMessage}
+                    {synonims && synonims.words ? <Select optionChangedEvent={this.onSelectChange} items={synonims.words} /> : errorMessage}
                 </ul>
             </div>
         )

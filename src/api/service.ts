@@ -36,7 +36,7 @@ export class ApiService {
 
     getData():Observable<TextModel> {
         return http(BASE_TEXT_URL, 'get', null).pipe(
-            map(res => {console.log(res.response); return res.response}),
+            map(res => res.response),
             switchMap(item => of(item)),
             toArray(),
             map(item => {
