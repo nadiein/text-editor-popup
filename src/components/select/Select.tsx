@@ -13,19 +13,12 @@ export class Select extends Component<MyProps> {
 
     render() {
         const { items } = this.props;
-
-        if (items.length > 0) {
-            return (
-                <select onClick={(e:any) => this.onOptionChangedEvent(e)}>
-                    {items.map((item:string, id:any) => (
-                        <option key={id} value={item}>{item}</option>
-                    ))}
-                </select>
-            )
-        } else {
-            return (
-                <span>Have no synonims</span>
-            )
-        }
+        return (
+            <select onClick={(e:any) => this.onOptionChangedEvent(e)}>
+                {items.map((item:string, id:any) => (
+                    <option key={id} value={item}>{item}</option>
+                ))}
+            </select>
+        )
     }
 }
