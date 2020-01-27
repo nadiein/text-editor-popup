@@ -1,0 +1,13 @@
+.popup-body {
+    display: flex;
+    max-width: fit-content;
+    padding: 5px;
+    background: rgba(#000, .7);
+
+    .form-holder {
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+    }
+}

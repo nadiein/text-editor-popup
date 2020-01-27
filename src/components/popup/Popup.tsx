@@ -35,24 +35,19 @@ export class Popup extends Component<MyProps> {
         if (!isOpen) return null;
         return (
             <div className="popup-body">
-                <label>
-                    <span>Font size:</span>
-                    <input name="fontSize" type="text" />
+                <label className="form-holder form-holder-xs">
+                    <input className="form-content" name="fontSize" type="text" />
                 </label>
-                <label>
-                    <span>Font weight:</span>
+                <label className="form-holder form-holder-xs">
                     <Select optionChangedEvent={this.onSelectChange} items={fontWeight} />
                 </label>
-                <label>
-                    <span>Font style:</span>
+                <label className="form-holder form-holder-sm">
                     <Select optionChangedEvent={this.onSelectChange} items={fontStyle} />
                 </label>
-                <label>
-                    <span>Font color:</span>
-                    <input name="fontColor" type="color" />
+                <label className="form-holder form-holder-xs">
+                    <input className="form-content" name="fontColor" type="color" />
                 </label>
-                <label>
-                    <span>Font color:</span>
+                <label className="form-holder form-holder-sm">
                     <Select optionChangedEvent={this.onSelectChange} items={synonims} />
                 </label>
             </div>

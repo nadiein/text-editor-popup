@@ -1,0 +1,25 @@
+input, select{
+    box-sizing: border-box;
+}
+
+.form-holder {
+    display: block;
+
+    &.form-holder-sm {
+        min-width: 80px;
+    }
+
+    &.form-holder-xs {
+        max-width: 50px;
+        min-width: 50px;
+    }
+
+}
+
+.form-content {
+    height: 25px;
+
+    &:not([type=color]) {
+        width: 100%;
+    }
+}
