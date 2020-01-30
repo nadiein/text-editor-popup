@@ -1,8 +1,11 @@
 .popup-body {
+    position: absolute;
     display: flex;
     max-width: fit-content;
     padding: 5px;
     background: rgba(#000, .7);
+    z-index: 9999;
+    transition: opacity .37s ease-in;
 
     .form-holder {
 

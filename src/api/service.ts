@@ -50,7 +50,7 @@ export class ApiService {
         )
     }
 
-    getSynonims(params:RequestParams):Observable<SynonymsModel[]> {
+    getSynonims(params:RequestParams):Observable<SynonymsModel> {
         let url = `${BASE_SYNONIMS_URL + params.word}`;
 
         if (params.word !== '') {
@@ -72,7 +72,7 @@ export class ApiService {
 export class TextModel {
     tid:string = '';
     text:any = '';
-    editedText:string = '';
+    editedText:TextModel;
     textConfig:TextConfig = new TextConfig();
 }
 
@@ -88,9 +88,9 @@ export class TextDto {
 }
 
 export class RequestParams {
-    word:string;
+    word:any;
 }
 
 export class SynonymsModel {
-    words:any[] = [];
+    words:Array<unknown> = [];
 }

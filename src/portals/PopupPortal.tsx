@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Popup } from './../components/popup/Popup';
+import { Popup, PopupModel } from './../components/popup/Popup';
 
 type MyProps = {
-    isOpen:boolean,
-    synonims:any,
+    model:PopupModel,
     optionChangedEvent:Function
     // onRequestClose:Function
 };

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 type MyProps = {
-    items:string[],
+    items:any[],
     optionChangedEvent:Function
 };
 
@@ -15,7 +15,7 @@ export class Select extends Component<MyProps> {
         const { items } = this.props;
         return (
             <select className="form-content" onClick={(e:any) => this.onOptionChangedEvent(e)}>
-                {items.map((item:string, id:any) => (
+                {items && items.map((item:any, id:any) => (
                     <option key={id} value={item}>{item}</option>
                 ))}
             </select>
