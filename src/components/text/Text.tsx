@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ApiService, RequestParams, TextModel, SynonymsModel } from '../../api/service';
+import { ApiService, RequestParams, TextModel, SynonymsModel, TextConfig } from '../../api/service';
 import { EventType } from '../../utils/utils';
 import { PopupPortal } from './../../portals/PopupPortal';
 import { PopupModel, PopupFieldChangedType } from '../popup/Popup';
@@ -71,18 +71,63 @@ export default class Text extends Component<MyProps, MyState> {
     }
 
     onSelectChange = (popupChanged:{type:PopupFieldChangedType, option:string}) => {
-        const {popup} = this.state;
+        const {model, popup} = this.state;
         if (this.selectedText && popup.synonims.length > 0) {
-            this.selectedText.getRangeAt(0).deleteContents();
-            // TODO update model text config with incoming text styles
+            this.initAndUpdateTextConfig(popupChanged);
+            model.textConfig = this.initAndUpdateTextConfig(popupChanged);
+            this.setState({model:model})
+
             let newElement = document.createElement('span');
-            newElement.textContent = popupChanged.option;
-            let fragment = document.createDocumentFragment();
-            while ( newElement.firstChild ) {
-                fragment.appendChild(newElement.firstChild);
-            }
-            this.selectedText.getRangeAt(0).insertNode(fragment);
+
+            if (popupChanged.type == PopupFieldChangedType.Size) this.applyChangesToSelection(newElement, popupChanged.type);
+            if (popupChanged.type == PopupFieldChangedType.Weight) this.applyChangesToSelection(newElement, popupChanged.type);
+            if (popupChanged.type == PopupFieldChangedType.Style) this.applyChangesToSelection(newElement, popupChanged.type);
+            if (popupChanged.type == PopupFieldChangedType.Color) this.applyChangesToSelection(newElement, popupChanged.type);
+            if (popupChanged.type == PopupFieldChangedType.Synonim) this.applyChangesToSelection(newElement, popupChanged.type);
         }
+    }
+
+    applyChangesToSelection(element:HTMLElement, type:PopupFieldChangedType) {
+        const {model} = this.state;
+        switch(type) {
+            // TODO finish styling via insert new node
+            case PopupFieldChangedType.Size: {
+                element.style.fontSize = model.textConfig.size;
+                break;
+            }
+            case PopupFieldChangedType.Weight: {
+                element.style.fontWeight = model.textConfig.weight;
+                break;
+            }
+            case PopupFieldChangedType.Style: {
+                element.style.fontStyle = model.textConfig.style;
+                break;
+            }
+            case PopupFieldChangedType.Color: {
+                element.style.color = model.textConfig.color;
+                break;
+            }
+            case PopupFieldChangedType.Synonim: {
+                let fragment = document.createDocumentFragment();
+                this.selectedText.getRangeAt(0).deleteContents();
+                element.textContent = model.textConfig.synonim;
+                while ( element.firstChild ) {
+                    fragment.appendChild(element.firstChild);
+                }
+                this.selectedText.getRangeAt(0).insertNode(fragment);
+                break;
+            }
+        }
+    }
+
+    initAndUpdateTextConfig(popupChanged:{type:PopupFieldChangedType, option:string}):TextConfig {
+        let config:TextConfig = new TextConfig();
+        config.size = popupChanged.type == PopupFieldChangedType.Size ? popupChanged.option : '';
+        config.weight = popupChanged.type == PopupFieldChangedType.Weight ? popupChanged.option : '';
+        config.style = popupChanged.type == PopupFieldChangedType.Style ? popupChanged.option : '';
+        config.color = popupChanged.type == PopupFieldChangedType.Color ? popupChanged.option : '';
+        config.synonim = popupChanged.type == PopupFieldChangedType.Synonim ? popupChanged.option : '';
+        return config;
     }
 
     setWrapperRef = (node:any) => { this.ref = node }

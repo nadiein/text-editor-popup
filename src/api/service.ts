@@ -79,8 +79,9 @@ export class TextModel {
 export class TextConfig {
     color:string = '';
     style:string = '';
-    size:number = null;
-    weight:number = null;
+    size:string = '';
+    weight:string = '';
+    synonim:string = '';
 }
 
 export class TextDto {
