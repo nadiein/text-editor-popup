@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { ApiService, RequestParams, TextModel, SynonymsModel } from '../../api/service';
 import { EventType } from '../../utils/utils';
 import { PopupPortal } from './../../portals/PopupPortal';
-import { PopupModel } from '../popup/Popup';
+import { PopupModel, PopupFieldChangedType } from '../popup/Popup';
 
 type MyProps = {};
 type MyState = {
@@ -70,13 +70,13 @@ export default class Text extends Component<MyProps, MyState> {
         }
     }
 
-    onSelectChange = (option:string) => {
+    onSelectChange = (popupChanged:{type:PopupFieldChangedType, option:string}) => {
         const {popup} = this.state;
         if (this.selectedText && popup.synonims.length > 0) {
             this.selectedText.getRangeAt(0).deleteContents();
-
+            // TODO update model text config with incoming text styles
             let newElement = document.createElement('span');
-            newElement.textContent = option;
+            newElement.textContent = popupChanged.option;
             let fragment = document.createDocumentFragment();
             while ( newElement.firstChild ) {
                 fragment.appendChild(newElement.firstChild);
