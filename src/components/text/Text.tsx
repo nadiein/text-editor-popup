@@ -77,47 +77,56 @@ export default class Text extends Component<MyProps, MyState> {
             model.textConfig = this.initAndUpdateTextConfig(popupChanged);
             this.setState({model:model})
 
-            let newElement = document.createElement('span');
-
-            if (popupChanged.type == PopupFieldChangedType.Size) this.applyChangesToSelection(newElement, popupChanged.type);
-            if (popupChanged.type == PopupFieldChangedType.Weight) this.applyChangesToSelection(newElement, popupChanged.type);
-            if (popupChanged.type == PopupFieldChangedType.Style) this.applyChangesToSelection(newElement, popupChanged.type);
-            if (popupChanged.type == PopupFieldChangedType.Color) this.applyChangesToSelection(newElement, popupChanged.type);
-            if (popupChanged.type == PopupFieldChangedType.Synonim) this.applyChangesToSelection(newElement, popupChanged.type);
+            if (popupChanged.type == PopupFieldChangedType.Size) this.applyChangesToSelection(popupChanged.type);
+            if (popupChanged.type == PopupFieldChangedType.Weight) this.applyChangesToSelection(popupChanged.type);
+            if (popupChanged.type == PopupFieldChangedType.Style) this.applyChangesToSelection(popupChanged.type);
+            if (popupChanged.type == PopupFieldChangedType.Color) this.applyChangesToSelection(popupChanged.type);
+            if (popupChanged.type == PopupFieldChangedType.Synonim) this.applyChangesToSelection(popupChanged.type);
         }
     }
 
-    applyChangesToSelection(element:HTMLElement, type:PopupFieldChangedType) {
+    applyChangesToSelection(type:PopupFieldChangedType) {
         const {model} = this.state;
+
+        let newElement = document.createElement('span');
+        let fragment = document.createDocumentFragment();
+        let currentText = this.selectedText.toString();
         switch(type) {
             // TODO finish styling via insert new node
             case PopupFieldChangedType.Size: {
-                element.style.fontSize = model.textConfig.size;
+                newElement.textContent = currentText;
+                // TODO hoockup size changes
+                console.log(model.textConfig.size)
+                newElement.style.fontSize = model.textConfig.size;
                 break;
             }
             case PopupFieldChangedType.Weight: {
-                element.style.fontWeight = model.textConfig.weight;
+                newElement.textContent = currentText;
+                newElement.style.fontWeight = model.textConfig.weight;
                 break;
             }
             case PopupFieldChangedType.Style: {
-                element.style.fontStyle = model.textConfig.style;
+                newElement.textContent = currentText;
+                newElement.style.fontStyle = model.textConfig.style;
                 break;
             }
             case PopupFieldChangedType.Color: {
-                element.style.color = model.textConfig.color;
+                newElement.textContent = currentText;
+                // TODO hookup color changes
+                console.log(model.textConfig.color)
+                newElement.style.color = model.textConfig.color;
                 break;
             }
             case PopupFieldChangedType.Synonim: {
-                let fragment = document.createDocumentFragment();
-                this.selectedText.getRangeAt(0).deleteContents();
-                element.textContent = model.textConfig.synonim;
-                while ( element.firstChild ) {
-                    fragment.appendChild(element.firstChild);
-                }
-                this.selectedText.getRangeAt(0).insertNode(fragment);
+                newElement.textContent = model.textConfig.synonim;
                 break;
             }
         }
+        // while ( newElement.firstChild ) {
+        //     fragment.appendChild(newElement.firstChild);
+        // }
+        this.selectedText.getRangeAt(0).deleteContents();
+        this.selectedText.getRangeAt(0).insertNode(newElement);
     }
 
     initAndUpdateTextConfig(popupChanged:{type:PopupFieldChangedType, option:string}):TextConfig {
