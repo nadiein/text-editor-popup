@@ -91,11 +91,13 @@ export default class Text extends Component<MyProps, MyState> {
         let newElement = document.createElement('span');
         let fragment = document.createDocumentFragment();
         let currentText = this.selectedText.toString();
+        let savedSelection;
         switch(type) {
             // TODO finish styling via insert new node
             case PopupFieldChangedType.Size: {
                 newElement.textContent = currentText;
                 // TODO hoockup size changes
+                // savedSelection = this.saveSelection();
                 console.log(model.textConfig.size)
                 newElement.style.fontSize = model.textConfig.size;
                 break;
@@ -125,6 +127,8 @@ export default class Text extends Component<MyProps, MyState> {
         // while ( newElement.firstChild ) {
         //     fragment.appendChild(newElement.firstChild);
         // }
+        
+        // this.restoreSelection(savedSelection)
         this.selectedText.getRangeAt(0).deleteContents();
         this.selectedText.getRangeAt(0).insertNode(newElement);
     }
@@ -146,6 +150,26 @@ export default class Text extends Component<MyProps, MyState> {
             if (this.popupModel) {
                 this.popupModel.isOpen = false;
                 this.setState({popup:this.popupModel});
+            }
+        }
+    }
+
+    saveSelection = () => {
+        if (window.getSelection) {
+            var sel = window.getSelection();
+            if (sel.getRangeAt && sel.rangeCount) {
+                return sel.getRangeAt(0);
+            }
+        }
+        return null;
+    }
+    
+    restoreSelection = (range:any) => {
+        if (range) {
+            if (window.getSelection) {
+                var sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
             }
         }
     }

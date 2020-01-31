@@ -15,7 +15,13 @@ export class Popup extends Component<MyProps> {
         super(props);
     }
 
-    onSelectChange = (type:PopupFieldChangedType, option:string) => { this.props.optionChangedEvent({type:type, option:option}) }
+    onSelectChange = (type:PopupFieldChangedType, option:any) => {
+        if (type == PopupFieldChangedType.Size || type == PopupFieldChangedType.Color) {
+            this.props.optionChangedEvent({type:type, option:option.target.value})
+        } else {
+            this.props.optionChangedEvent({type:type, option:option})
+        }
+    }
 
     render() {
         const { model } = this.props;
@@ -31,7 +37,7 @@ export class Popup extends Component<MyProps> {
             return (
                 <div style={styles} className="popup-body">
                     <label className="form-holder form-holder-xs">
-                        <input onKeyPress={(e:any) => this.onSelectChange(0, e)} className="form-content" name="fontSize" type="text" />
+                        <input onChange={(e:any) => this.onSelectChange(0, e)} className="form-content" name="fontSize" type="text" />
                     </label>
                     <label className="form-holder form-holder-xs">
                         <Select optionChangedEvent={(e:any) => this.onSelectChange(1, e)} items={fontWeight} />
