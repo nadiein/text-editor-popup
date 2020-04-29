@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { ApiService, RequestParams, TextModel, SynonymsModel, TextConfig } from '../../api/service';
 import { EventType } from '../../utils/utils';
 import { PopupPortal } from './../../portals/PopupPortal';
-import { PopupModel, PopupFieldChangedType } from '../popup/Popup';
+import { PopupModel, PopupFieldChangedType, FontPropsVo } from '../popup/Popup';
 
 type MyProps = {};
 type MyState = {
@@ -53,11 +53,22 @@ export default class Text extends Component<MyProps, MyState> {
                 if (this.selectedText.toString() != '') {
                     let params:RequestParams = new RequestParams();
                     params.word = this.selectedText;
+
+                    const size = window.getComputedStyle(this.selectedText.anchorNode.parentElement, null).getPropertyValue('font-size');
+                    const weight = window.getComputedStyle(this.selectedText.anchorNode.parentElement, null).getPropertyValue('font-weight');
+                    const style = window.getComputedStyle(this.selectedText.anchorNode.parentElement, null).getPropertyValue('font-style');
+
+                    let fontProps = new FontPropsVo();
+                    fontProps.size = parseInt(size);
+                    fontProps.weight = Number(weight);
+                    fontProps.style = style;
+
                     if (this.selectedBoundingClientRect) {
                         this.popupModel = new PopupModel();
                         this.popupModel.x = this.selectedBoundingClientRect.x;
                         this.popupModel.y = this.selectedBoundingClientRect.y - (this.selectedBoundingClientRect.height + TOP_GAP);
                         this.popupModel.isOpen = true;
+                        this.popupModel.fontProps = fontProps;
                         this.setState({ popup: this.popupModel })
                     }
                     this.getSynonimsForWord(params);
@@ -156,7 +167,7 @@ export default class Text extends Component<MyProps, MyState> {
 
     saveSelection = () => {
         if (window.getSelection) {
-            var sel = window.getSelection();
+            let sel = window.getSelection();
             if (sel.getRangeAt && sel.rangeCount) {
                 return sel.getRangeAt(0);
             }

@@ -30,14 +30,14 @@ export class Popup extends Component<MyProps> {
             top:model && model.y,
             left:model && model.x
         }
-
+        // TODO implement two-way databinding
         if (!isOpen) {
             return null;
         } else {
             return (
                 <div style={styles} className="popup-body">
                     <label className="form-holder form-holder-xs">
-                        <input onChange={(e:any) => this.onSelectChange(0, e)} className="form-content" name="fontSize" type="text" />
+                        <input onChange={(e:any) => this.onSelectChange(0, e)} className="form-content" name="fontSize" type="text" value={model.fontProps.size} />
                     </label>
                     <label className="form-holder form-holder-xs">
                         <Select optionChangedEvent={(e:any) => this.onSelectChange(1, e)} items={fontWeight} />
@@ -61,9 +61,16 @@ export class PopupModel {
     x:number;
     y:number;
     isOpen:boolean = false;
+    fontProps:FontPropsVo = new FontPropsVo();
     synonims:Array<unknown>;
 }
 
 export enum PopupFieldChangedType {
     Size, Weight, Style, Color, Synonim
+}
+
+export class FontPropsVo {
+    size:number;
+    weight:number;
+    style:string;
 }

@@ -11,19 +11,27 @@
     "@types/react": "^16.9.19",
     "@types/react-dom": "^16.9.5",
     "node-sass": "^4.13.1",
+    "parse-gitignore": "^1.0.1",
     "ramda": "^0.26.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-scripts": "3.3.0",
     "rxjs": "^6.5.4",
+    "size-limit": "file:../size-limit/packages/size-limit",
     "typescript": "^3.7.5"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "size": "size-limit"
   },
+  "size-limit": [
+    {
+      "path": "public/index.html"
+    }
+  ],
   "eslintConfig": {
     "extends": "react-app"
   },
