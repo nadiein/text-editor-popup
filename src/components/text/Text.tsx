@@ -3,16 +3,19 @@ import { ApiService, RequestParams, TextModel, SynonymsModel, TextConfig } from 
 import { EventType } from '../../utils/utils';
 import { PopupPortal } from './../../portals/PopupPortal';
 import { PopupModel, PopupFieldChangedType, FontPropsVo } from '../popup/Popup';
+import { Subscription } from 'rxjs';
 
 type MyProps = {};
 type MyState = {
-    model:TextModel,
+    data:TextModel,
     popup:PopupModel,
+    range:any,
     isLoading:boolean,
     errorMessage:any,
 };
 
 export default class Text extends Component<MyProps, MyState> {
+    private subscriptions:Subscription[] = [];
     private service:ApiService;
     private stateConfig:MyState;
     protected popupModel:PopupModel;
@@ -30,13 +33,16 @@ export default class Text extends Component<MyProps, MyState> {
     componentDidMount = () => {
         document.addEventListener('mousedown', this.handleClickOutside);
 
-        this.service.getData().subscribe(res => {
-            this.setState({model: res, isLoading: false})
-        })
+        this.subscriptions.push(this.service.getData().subscribe(res => {
+            this.setState({data: res, isLoading: false})
+        }))
     }
 
     componentWillUnmount() {
         document.removeEventListener('mousedown', this.handleClickOutside);
+        while (this.subscriptions.length > 0) {
+            this.subscriptions.shift().unsubscribe();
+        }
     }
 
     getSynonimsForWord = (params:RequestParams) => {
@@ -52,6 +58,7 @@ export default class Text extends Component<MyProps, MyState> {
             case EventType.MouseUp: {
                 if (this.selectedText.toString() != '') {
                     let params:RequestParams = new RequestParams();
+                    let textModel = new TextModel();
                     params.word = this.selectedText;
 
                     const size = window.getComputedStyle(this.selectedText.anchorNode.parentElement, null).getPropertyValue('font-size');
@@ -69,7 +76,7 @@ export default class Text extends Component<MyProps, MyState> {
                         this.popupModel.y = this.selectedBoundingClientRect.y - (this.selectedBoundingClientRect.height + TOP_GAP);
                         this.popupModel.isOpen = true;
                         this.popupModel.fontProps = fontProps;
-                        this.setState({ popup: this.popupModel })
+                        this.setState({ popup: this.popupModel, range: this.saveSelection() })
                     }
                     this.getSynonimsForWord(params);
                 }
@@ -82,66 +89,46 @@ export default class Text extends Component<MyProps, MyState> {
     }
 
     onSelectChange = (popupChanged:{type:PopupFieldChangedType, option:string}) => {
-        const {model, popup} = this.state;
-        if (this.selectedText && popup.synonims.length > 0) {
-            this.initAndUpdateTextConfig(popupChanged);
-            model.textConfig = this.initAndUpdateTextConfig(popupChanged);
-            this.setState({model:model})
+        const {data, popup} = this.state;
+        if (this.selectedText || popup.synonims.length > 0) {
+            // this.initAndUpdateTextConfig(popupChanged);
+            // model.textConfig = this.initAndUpdateTextConfig(popupChanged);
+            // this.setState({model:model})
 
-            if (popupChanged.type == PopupFieldChangedType.Size) this.applyChangesToSelection(popupChanged.type);
-            if (popupChanged.type == PopupFieldChangedType.Weight) this.applyChangesToSelection(popupChanged.type);
-            if (popupChanged.type == PopupFieldChangedType.Style) this.applyChangesToSelection(popupChanged.type);
-            if (popupChanged.type == PopupFieldChangedType.Color) this.applyChangesToSelection(popupChanged.type);
-            if (popupChanged.type == PopupFieldChangedType.Synonim) this.applyChangesToSelection(popupChanged.type);
+            if (popupChanged.type == PopupFieldChangedType.Size) this.applyChangesToSelection(popupChanged.type, popupChanged.option);
+            if (popupChanged.type == PopupFieldChangedType.Weight) this.applyChangesToSelection(popupChanged.type, popupChanged.option);
+            if (popupChanged.type == PopupFieldChangedType.Style) this.applyChangesToSelection(popupChanged.type, popupChanged.option);
+            if (popupChanged.type == PopupFieldChangedType.Color) this.applyChangesToSelection(popupChanged.type, popupChanged.option);
+            if (popupChanged.type == PopupFieldChangedType.Synonim) this.applyChangesToSelection(popupChanged.type, popupChanged.option);
         }
     }
 
-    applyChangesToSelection(type:PopupFieldChangedType) {
-        const {model} = this.state;
+    applyChangesToSelection(type:PopupFieldChangedType, value:any) {
+        const {data, range} = this.state;
 
         let newElement = document.createElement('span');
         let fragment = document.createDocumentFragment();
-        let currentText = this.selectedText.toString();
-        let savedSelection;
-        switch(type) {
-            // TODO finish styling via insert new node
-            case PopupFieldChangedType.Size: {
-                newElement.textContent = currentText;
-                // TODO hoockup size changes
-                // savedSelection = this.saveSelection();
-                console.log(model.textConfig.size)
-                newElement.style.fontSize = model.textConfig.size;
-                break;
-            }
-            case PopupFieldChangedType.Weight: {
-                newElement.textContent = currentText;
-                newElement.style.fontWeight = model.textConfig.weight;
-                break;
-            }
-            case PopupFieldChangedType.Style: {
-                newElement.textContent = currentText;
-                newElement.style.fontStyle = model.textConfig.style;
-                break;
-            }
-            case PopupFieldChangedType.Color: {
-                newElement.textContent = currentText;
-                // TODO hookup color changes
-                console.log(model.textConfig.color)
-                newElement.style.color = model.textConfig.color;
-                break;
-            }
-            case PopupFieldChangedType.Synonim: {
-                newElement.textContent = model.textConfig.synonim;
-                break;
-            }
+
+        if (type == PopupFieldChangedType.Size) {
+            newElement.innerText = range.toString();
+            newElement.style.fontSize = value + 'px';
+        } else if (type == PopupFieldChangedType.Synonim) {
+            newElement.textContent = value;
+        } else if (type == PopupFieldChangedType.Weight) {
+
+        } else if (type == PopupFieldChangedType.Style) {
+
+        } else if (type == PopupFieldChangedType.Color) {
+
         }
-        // while ( newElement.firstChild ) {
-        //     fragment.appendChild(newElement.firstChild);
-        // }
-        
-        // this.restoreSelection(savedSelection)
+
+        while ( newElement.firstChild ) {
+            fragment.appendChild(newElement.firstChild);
+        }
+
+        this.restoreSelection(range)
         this.selectedText.getRangeAt(0).deleteContents();
-        this.selectedText.getRangeAt(0).insertNode(newElement);
+        this.selectedText.getRangeAt(0).insertNode(fragment);
     }
 
     initAndUpdateTextConfig(popupChanged:{type:PopupFieldChangedType, option:string}):TextConfig {
@@ -188,28 +175,31 @@ export default class Text extends Component<MyProps, MyState> {
     // handle case with select component still exist when selection is empty
 
     render() {
-        const {model, popup, isLoading, errorMessage} = this.state;
+        const {data, popup, isLoading, errorMessage} = this.state;
         if (isLoading) {
             return <p>Loading...</p>;
         }
 
         return (
             <div>
-                {model && model.text ? model.text.map((item:any, id:any) => (
-                    <li
-                        ref={(e:any) => this.setWrapperRef(e)}
-                        onDoubleClick={(e:any) => this.dispatchEvent(e, 0)}
-                        onMouseDown={(e:any) => this.dispatchEvent(e, 1)}
-                        onMouseUp={(e:any) => this.dispatchEvent(e, 2)}
-                        key={id}>
-                            {item}
-                    </li>
-                )) : errorMessage}
-                <PopupPortal
-                    model={popup}
-                    optionChangedEvent={this.onSelectChange}
-                    /*onRequestClose={() => this.setState({ isOpen: false })}*/>
-                </PopupPortal>
+                <h1>Dummy text to demonstrate popup functionality.</h1>
+                <div>
+                    {data && data.text ? data.text.map((item:any, id:any) => (
+                        <p
+                            ref={(e:any) => this.setWrapperRef(e)}
+                            onDoubleClick={(e:any) => this.dispatchEvent(e, 0)}
+                            onMouseDown={(e:any) => this.dispatchEvent(e, 1)}
+                            onMouseUp={(e:any) => this.dispatchEvent(e, 2)}
+                            key={id}>
+                                {item}
+                        </p>
+                    )) : errorMessage}
+                    <PopupPortal
+                        model={popup}
+                        optionChangedEvent={this.onSelectChange}
+                        /*onRequestClose={() => this.setState({ isOpen: false })}*/>
+                    </PopupPortal>
+                </div>
             </div>
         )
 

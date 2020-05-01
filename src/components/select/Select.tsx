@@ -14,7 +14,7 @@ export class Select extends Component<MyProps> {
     render() {
         const { items } = this.props;
         return (
-            <select className="form-content" onClick={(e:any) => this.onOptionChangedEvent(e)}>
+            <select className="form-content" onChange={(e:any) => this.onOptionChangedEvent(e)}>
                 {items && items.map((item:any, id:any) => (
                     <option key={id} value={item}>{item}</option>
                 ))}

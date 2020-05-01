@@ -10,16 +10,32 @@ type MyProps = {
 };
 
 export class Popup extends Component<MyProps> {
+    public _value:any;
+
+    get value():number { return this._value }
+    set value(val:number) { this._value = val }
 
     constructor(props:any) {
         super(props);
     }
 
-    onSelectChange = (type:PopupFieldChangedType, option:any) => {
-        if (type == PopupFieldChangedType.Size || type == PopupFieldChangedType.Color) {
-            this.props.optionChangedEvent({type:type, option:option.target.value})
+    componentDidMount = () => {
+        this.value = this.props.model && this.props.model.fontProps.size
+    }
+
+    onSelectChange = (type:PopupFieldChangedType, event:any) => {
+        if (type == PopupFieldChangedType.Color) {
+            this.props.optionChangedEvent({type:type, option:event.target.value})
         } else {
-            this.props.optionChangedEvent({type:type, option:option})
+            this.props.optionChangedEvent({type:type, option:event})
+        }
+    }
+
+    onKeyDownEvent = (type:PopupFieldChangedType, e:any) => {
+        if (e.keyCode == 13) {
+            if (type == PopupFieldChangedType.Size) {
+                this.props.optionChangedEvent({type:type, option:e.target.value})
+            }
         }
     }
 
@@ -37,7 +53,7 @@ export class Popup extends Component<MyProps> {
             return (
                 <div style={styles} className="popup-body">
                     <label className="form-holder form-holder-xs">
-                        <input onChange={(e:any) => this.onSelectChange(0, e)} className="form-content" name="fontSize" type="text" value={model.fontProps.size} />
+                        <input className="form-content" name="fontSize" type="text" onKeyDown={e => this.onKeyDownEvent(0, e)} />
                     </label>
                     <label className="form-holder form-holder-xs">
                         <Select optionChangedEvent={(e:any) => this.onSelectChange(1, e)} items={fontWeight} />
