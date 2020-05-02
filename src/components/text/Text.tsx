@@ -58,7 +58,6 @@ export default class Text extends Component<MyProps, MyState> {
             case EventType.MouseUp: {
                 if (this.selectedText.toString() != '') {
                     let params:RequestParams = new RequestParams();
-                    let textModel = new TextModel();
                     params.word = this.selectedText;
 
                     const size = window.getComputedStyle(this.selectedText.anchorNode.parentElement, null).getPropertyValue('font-size');
@@ -108,27 +107,29 @@ export default class Text extends Component<MyProps, MyState> {
 
         let newElement = document.createElement('span');
         let fragment = document.createDocumentFragment();
-
+        // TODO: save changed text model size/weight/style/color and set up for range while popup changes coming
         if (type == PopupFieldChangedType.Size) {
             newElement.innerText = range.toString();
             newElement.style.fontSize = value + 'px';
         } else if (type == PopupFieldChangedType.Synonim) {
             newElement.textContent = value;
         } else if (type == PopupFieldChangedType.Weight) {
-
+            newElement.innerText = range.toString();
+            newElement.style.fontWeight = value;
         } else if (type == PopupFieldChangedType.Style) {
-
+            newElement.innerText = range.toString();
+            newElement.style.fontStyle = value;
         } else if (type == PopupFieldChangedType.Color) {
-
+            newElement.innerText = range.toString();
+            newElement.style.color = value;
         }
-
-        while ( newElement.firstChild ) {
-            fragment.appendChild(newElement.firstChild);
-        }
+        fragment.appendChild(newElement);
 
         this.restoreSelection(range)
         this.selectedText.getRangeAt(0).deleteContents();
         this.selectedText.getRangeAt(0).insertNode(fragment);
+
+        this.setState({ range: this.saveSelection() })
     }
 
     initAndUpdateTextConfig(popupChanged:{type:PopupFieldChangedType, option:string}):TextConfig {
