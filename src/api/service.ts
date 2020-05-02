@@ -72,8 +72,6 @@ export class ApiService {
 export class TextModel {
     tid:string = '';
     text:any = '';
-    editedText:TextModel;
-    textConfig:TextConfig = new TextConfig();
 }
 
 export class TextConfig {
