@@ -35,7 +35,7 @@ export default class Text extends Component<MyProps, MyState> {
             popup: new PopupModel(),
             textConfig: new TextConfig()
         })
-        
+
         document.addEventListener('mousedown', this.handleClickOutside);
 
         this.subscriptions.push(this.service.getData().subscribe(res => {
@@ -97,41 +97,30 @@ export default class Text extends Component<MyProps, MyState> {
         const {data, popup, textConfig} = this.state;
         if (this.selectedText || popup.synonims.length > 0) {
             this.setState({ textConfig:this.initAndUpdateTextConfig(popupChanged) })
-
-            if (popupChanged.type == PopupFieldChangedType.Size) this.applyChangesToSelection(popupChanged.type, popupChanged.option);
-            if (popupChanged.type == PopupFieldChangedType.Weight) this.applyChangesToSelection(popupChanged.type, popupChanged.option);
-            if (popupChanged.type == PopupFieldChangedType.Style) this.applyChangesToSelection(popupChanged.type, popupChanged.option);
-            if (popupChanged.type == PopupFieldChangedType.Color) this.applyChangesToSelection(popupChanged.type, popupChanged.option);
-            if (popupChanged.type == PopupFieldChangedType.Synonim) this.applyChangesToSelection(popupChanged.type, popupChanged.option);
+            this.applyChangesToSelection(popupChanged.type, popupChanged.option);
         }
     }
 
     applyChangesToSelection(type:PopupFieldChangedType, value:any) {
         const {data, range, textConfig} = this.state;
-
         let newElement = document.createElement('span');
         let fragment = document.createDocumentFragment();
-        // TODO: save changed text model size/weight/style/color and set up for range while popup changes coming
-        if (type == PopupFieldChangedType.Size) {
-            textConfig.size = value;
-            newElement.innerText = range.toString();
-            newElement.style.fontSize = textConfig.size + 'px';
-        } else if (type == PopupFieldChangedType.Synonim) {
-            textConfig.synonim = value;
-            newElement.textContent = value;
-        } else if (type == PopupFieldChangedType.Weight) {
-            textConfig.weight = value;
-            newElement.innerText = range.toString();
-            newElement.style.fontWeight = textConfig.weight;
-        } else if (type == PopupFieldChangedType.Style) {
-            textConfig.style = value;
-            newElement.innerText = range.toString();
-            newElement.style.fontStyle = textConfig.style;
-        } else if (type == PopupFieldChangedType.Color) {
-            textConfig.color = value;
-            newElement.innerText = range.toString();
-            newElement.style.color = textConfig.color;
+
+        // if font props already being set update selected text
+        if (textConfig) {
+            if (textConfig.size != '' ||
+                textConfig.weight != '' ||
+                textConfig.style != '' ||
+                textConfig.color != '') {
+                    newElement.innerText = range.toString();
+                    newElement.style.fontSize = textConfig.size + 'px';
+                    newElement.style.fontWeight = textConfig.weight;
+                    newElement.style.fontStyle = textConfig.style;
+                    newElement.style.color = textConfig.color;
+                    newElement.textContent = textConfig.synonim != '' ? textConfig.synonim : range.toString();
+            }
         }
+
         fragment.appendChild(newElement);
 
         this.restoreSelection(range)
@@ -143,11 +132,11 @@ export default class Text extends Component<MyProps, MyState> {
 
     initAndUpdateTextConfig(popupChanged:{type:PopupFieldChangedType, option:string}):TextConfig {
         const { textConfig } = this.state;
-        textConfig.size = popupChanged.type == PopupFieldChangedType.Size ? popupChanged.option : '';
-        textConfig.weight = popupChanged.type == PopupFieldChangedType.Weight ? popupChanged.option : '';
-        textConfig.style = popupChanged.type == PopupFieldChangedType.Style ? popupChanged.option : '';
-        textConfig.color = popupChanged.type == PopupFieldChangedType.Color ? popupChanged.option : '';
-        textConfig.synonim = popupChanged.type == PopupFieldChangedType.Synonim ? popupChanged.option : '';
+        if (popupChanged.type == PopupFieldChangedType.Size) textConfig.size = popupChanged.option;
+        else if (popupChanged.type == PopupFieldChangedType.Weight) textConfig.weight = popupChanged.option;
+        else if (popupChanged.type == PopupFieldChangedType.Style) textConfig.style = popupChanged.option;
+        else if (popupChanged.type == PopupFieldChangedType.Color) textConfig.color = popupChanged.option;
+        else if (popupChanged.type == PopupFieldChangedType.Synonim) textConfig.synonim = popupChanged.option;
         return textConfig;
     }
 
